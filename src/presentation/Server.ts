@@ -16,7 +16,24 @@ const corsOptions = {
 };
 
 export class Server {
-  public static async run(
+  private static instance: Server;
+  private io: SocketServer | undefined;
+
+  private constructor() {}
+
+  public static getInstance(): Server {
+    if (!Server.instance) {
+      Server.instance = new Server();
+    }
+
+    return Server.instance;
+  }
+
+  public getIO(): SocketServer | undefined {
+    return this.io;
+  }
+
+  public async run(
     port: number,
     controllers: ServerControllers,
   ): Promise<void> {
@@ -35,14 +52,14 @@ export class Server {
 
     const server = http.createServer(app);
 
-    const io = new SocketServer(server, {
+    this.io = new SocketServer(server, {
       cors: {
         origin: 'https://localhost:3000',
         methods: ['GET', 'POST'],
       },
     });
 
-    io.on('connection', (socket) => {
+    this.io.on('connection', (socket) => {
       socket.on('join', async (room) => {
         socket.join(room);
       });
