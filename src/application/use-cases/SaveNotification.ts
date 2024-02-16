@@ -17,11 +17,7 @@ interface ISaveNotificationDTO {
 }
 
 export class SaveNotification {
-  private notificationRepository: NotificationRepository;
-
-  constructor(notificationRepository: NotificationRepository) {
-    this.notificationRepository = notificationRepository;
-  }
+  constructor(private readonly _notificationRepo: NotificationRepository) {}
 
   public async execute({
     type,
@@ -40,6 +36,6 @@ export class SaveNotification {
       userId,
     });
 
-    return this.notificationRepository.save(notification);
+    return this._notificationRepo.save(notification);
   }
 }
