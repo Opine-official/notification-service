@@ -4,9 +4,12 @@ import { VerifyUserController } from './controllers/VerifyUserController';
 import cookieParser from 'cookie-parser';
 import { Server as SocketServer } from 'socket.io';
 import http from 'http';
+import { GetUserNotificationsController } from './controllers/GetUserNotificationsController';
+import { authenticateToken } from '@opine-official/authentication';
 
 interface ServerControllers {
   verifyUserController: VerifyUserController;
+  getUserNotificationsController: GetUserNotificationsController;
 }
 
 const corsOptions = {
@@ -48,6 +51,10 @@ export class Server {
 
     app.get('/verifyUser', (req, res) => {
       controllers.verifyUserController.handle(req, res);
+    });
+
+    app.get('/user', authenticateToken, (req, res) => {
+      controllers.getUserNotificationsController.handle(req, res);
     });
 
     const server = http.createServer(app);

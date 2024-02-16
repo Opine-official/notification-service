@@ -5,4 +5,5 @@ export interface INotificationRepository {
   save(notification: Notification): Promise<Error | void>;
   update(notification: Notification): Promise<Error | void>;
   delete(notificationId: string): Promise<Error | void>;
+  getUserNotifications(userId: string): Promise<Notification[] | Error>;
 }

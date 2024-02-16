@@ -81,4 +81,36 @@ export class NotificationRepository implements INotificationRepository {
       return new Error('Something went wrong');
     }
   }
+
+  public async getUserNotifications(
+    userId: string,
+  ): Promise<Notification[] | Error> {
+    try {
+      const notificationDocuments = await NotificationModel.find({
+        userId: userId,
+      })
+        .limit(5)
+        .sort({
+          createdAt: -1,
+        });
+
+      return notificationDocuments.map((notificationDocument) => {
+        return new Notification({
+          notificationId: notificationDocument.notificationId,
+          type: notificationDocument.type,
+          entityType: notificationDocument.entityType,
+          entityData: notificationDocument.entityData,
+          senderId: notificationDocument.senderId,
+          message: notificationDocument.message,
+          userId: notificationDocument.userId,
+          read: notificationDocument.read,
+        });
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return new Error(error.message);
+      }
+      return new Error('Something went wrong');
+    }
+  }
 }
