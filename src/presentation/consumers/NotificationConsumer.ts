@@ -7,6 +7,7 @@ import {
   EntityType,
   NotificationType,
 } from '../../infrastructure/models/NotificationModel';
+import { io } from '../../../main';
 
 const consumer = kafka.consumer({ groupId: 'notification-consumer-group' });
 
@@ -57,6 +58,10 @@ const run = async () => {
           console.error(saveNotificationResult);
           return;
         }
+
+        io?.to(commentData.userId).emit('new-notification', {
+          message: `You have a new comment`,
+        });
       }
     },
   });
