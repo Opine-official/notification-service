@@ -113,4 +113,22 @@ export class NotificationRepository implements INotificationRepository {
       return new Error('Something went wrong');
     }
   }
+
+  public async markAsRead(notificationId: string): Promise<Error | void> {
+    try {
+      await NotificationModel.updateOne(
+        {
+          notificationId: notificationId,
+        },
+        {
+          read: true,
+        },
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        return new Error(error.message);
+      }
+      return new Error('Something went wrong');
+    }
+  }
 }

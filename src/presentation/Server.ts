@@ -6,10 +6,12 @@ import { Server as SocketServer } from 'socket.io';
 import http from 'http';
 import { GetUserNotificationsController } from './controllers/GetUserNotificationsController';
 import { authenticateToken } from '@opine-official/authentication';
+import { MarkNotificationsAsReadController } from './controllers/MarkNotificationsAsReadController';
 
 interface ServerControllers {
   verifyUserController: VerifyUserController;
   getUserNotificationsController: GetUserNotificationsController;
+  markNotificationsAsReadController: MarkNotificationsAsReadController;
 }
 
 const corsOptions = {
@@ -55,6 +57,10 @@ export class Server {
 
     app.get('/user', authenticateToken, (req, res) => {
       controllers.getUserNotificationsController.handle(req, res);
+    });
+
+    app.post('/markAsRead', authenticateToken, (req, res) => {
+      controllers.markNotificationsAsReadController.handle(req, res);
     });
 
     const server = http.createServer(app);
