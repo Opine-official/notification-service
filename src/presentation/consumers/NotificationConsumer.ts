@@ -8,6 +8,7 @@ import {
   NotificationType,
 } from '../../infrastructure/models/NotificationModel';
 import { io } from '../../../main';
+import { UpdateTokenVersion } from '../../application/use-cases/UpdateTokenVersion';
 
 const consumer = kafka.consumer({ groupId: 'notification-consumer-group' });
 
@@ -15,11 +16,14 @@ const run = async () => {
   await consumer.connect();
   await consumer.subscribe({ topic: 'user-register-topic' });
   await consumer.subscribe({ topic: 'comment-create-topic' });
+  await consumer.subscribe({ topic: 'user-login-topic' });
+
   const userRepository = new UserRepository();
   const notificationRepository = new NotificationRepository();
 
   const saveUser = new SaveUser(userRepository);
   const saveNotification = new SaveNotification(notificationRepository);
+  const updateTokenVersion = new UpdateTokenVersion(userRepository);
 
   await consumer.run({
     eachMessage: async ({ topic, partition, message }) => {
@@ -62,6 +66,16 @@ const run = async () => {
         io?.to(commentData.userId).emit('new-notification', {
           message: `You have a new comment`,
         });
+      } else if (topic === 'user-login-topic') {
+        const userData = JSON.parse(message?.value?.toString());
+
+        const updateTokenVersionResult =
+          await updateTokenVersion.execute(userData);
+
+        if (updateTokenVersionResult instanceof Error) {
+          console.error(updateTokenVersionResult);
+          return;
+        }
       }
     },
   });

@@ -7,6 +7,7 @@ import http from 'http';
 import { GetUserNotificationsController } from './controllers/GetUserNotificationsController';
 import { authenticateRole } from '@opine-official/authentication';
 import { MarkNotificationsAsReadController } from './controllers/MarkNotificationsAsReadController';
+import { checkUserTokenVersion } from '../infrastructure/middlewares/checkTokenVersion';
 
 interface ServerControllers {
   verifyUserController: VerifyUserController;
@@ -61,13 +62,23 @@ export class Server {
       controllers.verifyUserController.handle(req, res);
     });
 
-    app.get('/user', authenticateRole('user'), (req, res) => {
-      controllers.getUserNotificationsController.handle(req, res);
-    });
+    app.get(
+      '/user',
+      authenticateRole('user'),
+      checkUserTokenVersion,
+      (req, res) => {
+        controllers.getUserNotificationsController.handle(req, res);
+      },
+    );
 
-    app.post('/markAsRead', authenticateRole('user'), (req, res) => {
-      controllers.markNotificationsAsReadController.handle(req, res);
-    });
+    app.post(
+      '/markAsRead',
+      authenticateRole('user'),
+      checkUserTokenVersion,
+      (req, res) => {
+        controllers.markNotificationsAsReadController.handle(req, res);
+      },
+    );
 
     const server = http.createServer(app);
 

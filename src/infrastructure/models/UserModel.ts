@@ -23,6 +23,11 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
   },
+  tokenVersion: {
+    type: Number,
+
+    default: 0,
+  },
 });
 
 export const UserModel = mongoose.model('User', UserSchema);
