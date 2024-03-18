@@ -84,7 +84,7 @@ export class Server {
 
     this.io = new SocketServer(server, {
       cors: {
-        origin: 'https://localhost:3000',
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
       },
     });
