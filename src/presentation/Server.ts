@@ -5,8 +5,9 @@ import cookieParser from 'cookie-parser';
 import { Server as SocketServer } from 'socket.io';
 import http from 'http';
 import { GetUserNotificationsController } from './controllers/GetUserNotificationsController';
-import { authenticateToken } from '@opine-official/authentication';
+import { authenticateRole } from '@opine-official/authentication';
 import { MarkNotificationsAsReadController } from './controllers/MarkNotificationsAsReadController';
+import { checkUserTokenVersion } from '../infrastructure/middlewares/checkTokenVersion';
 
 interface ServerControllers {
   verifyUserController: VerifyUserController;
@@ -61,19 +62,29 @@ export class Server {
       controllers.verifyUserController.handle(req, res);
     });
 
-    app.get('/user', authenticateToken, (req, res) => {
-      controllers.getUserNotificationsController.handle(req, res);
-    });
+    app.get(
+      '/user',
+      authenticateRole('user'),
+      checkUserTokenVersion,
+      (req, res) => {
+        controllers.getUserNotificationsController.handle(req, res);
+      },
+    );
 
-    app.post('/markAsRead', authenticateToken, (req, res) => {
-      controllers.markNotificationsAsReadController.handle(req, res);
-    });
+    app.post(
+      '/markAsRead',
+      authenticateRole('user'),
+      checkUserTokenVersion,
+      (req, res) => {
+        controllers.markNotificationsAsReadController.handle(req, res);
+      },
+    );
 
     const server = http.createServer(app);
 
     this.io = new SocketServer(server, {
       cors: {
-        origin: 'https://localhost:3000',
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
       },
     });
